@@ -5,4 +5,4 @@ compatibility_flags = ["nodejs_compat"]
 account_id = "9ee018e54b2e51abe3f976f6df6b33e5"
 
 [vars]
-ALLOWED_ORIGINS = "http://localhost:3000,https://confetti.win"
+ALLOWED_ORIGINS = "https://confetti.win"
