@@ -12,7 +12,7 @@ interface SessionRequest {
   asset: string;
 }
 
-const CHAIN_TO_BLOCKCHAIN: Record<string, string> = {
+const CHAIN_TO_COINBASE_CHAIN: Record<string, string> = {
   ethereum: "ethereum",
   mainnet: "ethereum",
   base: "base",
@@ -21,12 +21,7 @@ const CHAIN_TO_BLOCKCHAIN: Record<string, string> = {
   optimism: "optimism",
   polygon: "polygon",
   avalanche: "avalanche-c-chain",
-  bnb: "bnb-chain",
-  zora: "zora",
   celo: "celo",
-  gnosis: "gnosis",
-  scroll: "scroll",
-  linea: "linea",
 };
 
 const CDP_TOKEN_URL = "https://api.developer.coinbase.com/onramp/v1/token";
@@ -84,7 +79,10 @@ const validateRequest = (body: unknown): body is SessionRequest => {
   return true;
 };
 
-const handleSession = async (request: Request, env: Env): Promise<Response> => {
+const handleSession = async (
+  request: Request,
+  env: Env,
+): Promise<Response> => {
   const origin = request.headers.get("Origin");
   const corsHeaders = getCorsHeaders(origin, env);
 
@@ -109,7 +107,9 @@ const handleSession = async (request: Request, env: Env): Promise<Response> => {
 
   if (!validateRequest(body)) {
     return jsonResponse(
-      { error: "Invalid request: requires address (0x...), chain, and asset" },
+      {
+        error: "Invalid request: requires address (0x...), chain, and asset",
+      },
       400,
       corsHeaders,
     );
@@ -118,7 +118,7 @@ const handleSession = async (request: Request, env: Env): Promise<Response> => {
   const { address, chain, asset } = body;
 
   const blockchain =
-    CHAIN_TO_BLOCKCHAIN[chain.toLowerCase().replace(/\s+/g, "")];
+    CHAIN_TO_COINBASE_CHAIN[chain.toLowerCase().replace(/\s+/g, "")];
   if (!blockchain) {
     return jsonResponse(
       { error: `Unsupported chain: ${chain}` },
@@ -134,14 +134,9 @@ const handleSession = async (request: Request, env: Env): Promise<Response> => {
 
   let jwtToken: string;
   try {
-    let processedKey = env.CDP_API_SECRET;
-    if (processedKey.includes("\\n")) {
-      processedKey = processedKey.replace(/\\n/g, "\n");
-    }
-
     jwtToken = await generateJwt({
       apiKeyId: env.CDP_API_KEY,
-      apiKeySecret: processedKey,
+      apiKeySecret: env.CDP_API_SECRET,
       requestMethod: "POST",
       requestHost: "api.developer.coinbase.com",
       requestPath: "/onramp/v1/token",
