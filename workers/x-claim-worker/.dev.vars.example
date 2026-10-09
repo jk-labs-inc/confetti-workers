@@ -1,0 +1,13 @@
+# Copy to .dev.vars (git-ignored) and fill in. Never commit real values.
+X_CLIENT_ID=
+X_CLIENT_SECRET=
+SUPABASE_SERVICE_ROLE_KEY=
+PAYOUT_PRIVATE_KEY=
+RPC_URL=
+ALCHEMY_API_KEY=
+
+# Settings that are blank in wrangler.toml until a person fills them in.
+X_REDIRECT_URI=http://127.0.0.1:8787/x/callback
+SUPABASE_URL=
+PARA_JWT_AUDIENCE=
+ALLOWED_ORIGINS=http://127.0.0.1:3000
