@@ -1,0 +1,106 @@
+name = "x-claim-worker"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+account_id = "9ee018e54b2e51abe3f976f6df6b33e5"
+
+[observability]
+enabled = true
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[durable_objects.bindings]]
+name = "CLAIM_COORDINATOR"
+class_name = "ClaimCoordinator"
+
+[[durable_objects.bindings]]
+name = "ONE_TIME_STORE"
+class_name = "OneTimeStore"
+
+[exports.ClaimCoordinator]
+type = "durable-object"
+storage = "sqlite"
+
+[exports.OneTimeStore]
+type = "durable-object"
+storage = "sqlite"
+
+[vars]
+ALLOWED_ORIGINS = "https://confetti.win"
+X_REDIRECT_URI = ""
+PARA_ENVIRONMENT = "BETA"
+PARA_JWT_AUDIENCE = ""
+SUPABASE_URL = ""
+CLAIM_USD_AMOUNT = "5"
+DAILY_SPOT_LIMIT = "20"
+RELEASE_BATCH_SIZE = "5"
+RELEASE_INTERVAL_HOURS = "6"
+VERIFIED_TYPES = "blue,business,government"
+ACCEPT_IDENTITY_VERIFIED = "false"
+MIN_VERIFIED_FOLLOWERS = "1"
+RATIO_CHECK_ENABLED = "true"
+MAX_FOLLOWING_PER_FOLLOWER = "10"
+PAYOUT_CHAIN = "polygon"
+PAYOUT_PRICE_SYMBOL = "POL"
+MAX_TOKEN_AMOUNT_PER_CLAIM = "150"
+PAYOUT_CONFIRM_WAIT_SECONDS = "20"
+LOW_BALANCE_ALERT_USD = "100"
+LOW_BALANCE_ALERT_INTERVAL_HOURS = "6"
+CLAIMS_PAUSED = "false"
+
+[secrets]
+required = [
+  "X_CLIENT_ID",
+  "X_CLIENT_SECRET",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "PAYOUT_PRIVATE_KEY",
+  "RPC_URL",
+  "ALCHEMY_API_KEY",
+]
+
+[env.staging]
+routes = [{ pattern = "claim-staging.confetti.win", custom_domain = true }]
+
+[env.staging.assets]
+directory = "./manual-test"
+
+[[env.staging.durable_objects.bindings]]
+name = "CLAIM_COORDINATOR"
+class_name = "ClaimCoordinator"
+
+[[env.staging.durable_objects.bindings]]
+name = "ONE_TIME_STORE"
+class_name = "OneTimeStore"
+
+[env.staging.vars]
+ALLOWED_ORIGINS = "https://claim-staging.confetti.win"
+X_REDIRECT_URI = "https://claim-staging.confetti.win/x/callback"
+PARA_ENVIRONMENT = "BETA"
+PARA_JWT_AUDIENCE = "para-key-id-not-set"
+SUPABASE_URL = "https://zcwdleddygnvejastxdm.supabase.co"
+CLAIM_USD_AMOUNT = "0.10"
+DAILY_SPOT_LIMIT = "20"
+RELEASE_BATCH_SIZE = "5"
+RELEASE_INTERVAL_HOURS = "6"
+VERIFIED_TYPES = "blue,business,government"
+ACCEPT_IDENTITY_VERIFIED = "false"
+MIN_VERIFIED_FOLLOWERS = "1"
+RATIO_CHECK_ENABLED = "true"
+MAX_FOLLOWING_PER_FOLLOWER = "10"
+PAYOUT_CHAIN = "polygon"
+PAYOUT_PRICE_SYMBOL = "POL"
+MAX_TOKEN_AMOUNT_PER_CLAIM = "150"
+PAYOUT_CONFIRM_WAIT_SECONDS = "20"
+LOW_BALANCE_ALERT_USD = "1"
+LOW_BALANCE_ALERT_INTERVAL_HOURS = "6"
+CLAIMS_PAUSED = "false"
+
+[env.staging.secrets]
+required = [
+  "X_CLIENT_ID",
+  "X_CLIENT_SECRET",
+  "SUPABASE_SERVICE_ROLE_KEY",
+  "PAYOUT_PRIVATE_KEY",
+  "RPC_URL",
+  "ALCHEMY_API_KEY",
+]

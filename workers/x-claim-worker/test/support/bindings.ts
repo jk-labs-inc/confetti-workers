@@ -1,0 +1,42 @@
+export const TEST_APP_ORIGIN = "https://app.test";
+export const TEST_WORKER_ORIGIN = "https://worker.test";
+export const TEST_SUPABASE_URL = "https://supabase.test";
+export const TEST_RPC_URL = "https://rpc.test";
+export const TEST_SUPABASE_KEY = "sb_secret_test";
+export const TEST_X_CLIENT_ID = "test-x-client";
+export const TEST_X_CLIENT_SECRET = "test-x-secret";
+export const TEST_PARA_AUDIENCE = "test-para-api-key-id";
+export const TEST_PAYOUT_PRIVATE_KEY =
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+export const TEST_ALCHEMY_KEY = "test-alchemy-key";
+export const TEST_DAILY_LIMIT = 4;
+
+export const TEST_BINDINGS: Record<string, string> = {
+  ALLOWED_ORIGINS: `${TEST_APP_ORIGIN},http://localhost:3000`,
+  X_REDIRECT_URI: `${TEST_WORKER_ORIGIN}/x/callback`,
+  PARA_ENVIRONMENT: "BETA",
+  PARA_JWT_AUDIENCE: TEST_PARA_AUDIENCE,
+  SUPABASE_URL: TEST_SUPABASE_URL,
+  CLAIM_USD_AMOUNT: "5",
+  DAILY_SPOT_LIMIT: String(TEST_DAILY_LIMIT),
+  RELEASE_BATCH_SIZE: String(TEST_DAILY_LIMIT),
+  RELEASE_INTERVAL_HOURS: "6",
+  VERIFIED_TYPES: "blue,business,government",
+  ACCEPT_IDENTITY_VERIFIED: "false",
+  MIN_VERIFIED_FOLLOWERS: "1",
+  RATIO_CHECK_ENABLED: "true",
+  MAX_FOLLOWING_PER_FOLLOWER: "10",
+  PAYOUT_CHAIN: "polygon",
+  PAYOUT_PRICE_SYMBOL: "POL",
+  MAX_TOKEN_AMOUNT_PER_CLAIM: "50",
+  PAYOUT_CONFIRM_WAIT_SECONDS: "0",
+  LOW_BALANCE_ALERT_USD: "100",
+  LOW_BALANCE_ALERT_INTERVAL_HOURS: "6",
+  CLAIMS_PAUSED: "false",
+  X_CLIENT_ID: TEST_X_CLIENT_ID,
+  X_CLIENT_SECRET: TEST_X_CLIENT_SECRET,
+  SUPABASE_SERVICE_ROLE_KEY: TEST_SUPABASE_KEY,
+  PAYOUT_PRIVATE_KEY: TEST_PAYOUT_PRIVATE_KEY,
+  RPC_URL: TEST_RPC_URL,
+  ALCHEMY_API_KEY: TEST_ALCHEMY_KEY,
+};
