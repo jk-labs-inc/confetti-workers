@@ -27,6 +27,7 @@ storage = "sqlite"
 
 [vars]
 ALLOWED_ORIGINS = "https://confetti.win"
+LOGIN_COOKIE_SAME_SITE = "Lax"
 X_REDIRECT_URI = ""
 PARA_ENVIRONMENT = "BETA"
 PARA_JWT_AUDIENCE = ""
@@ -75,6 +76,7 @@ class_name = "OneTimeStore"
 
 [env.staging.vars]
 ALLOWED_ORIGINS = "https://claim-staging.confetti.win,https://deploy-preview-6462--confetti-main.netlify.app"
+LOGIN_COOKIE_SAME_SITE = "None"
 X_REDIRECT_URI = "https://claim-staging.confetti.win/x/callback"
 PARA_ENVIRONMENT = "BETA"
 PARA_JWT_AUDIENCE = "para-key-id-not-set"

@@ -44,7 +44,7 @@ export const handleXStart = async (context: RouteContext) => {
   return jsonResponse(
     { authorizeUrl: authorizeUrl(settings, state, await pkceChallenge(codeVerifier)) },
     200,
-    { "Set-Cookie": browserBindingCookie(browserBinding) },
+    { "Set-Cookie": browserBindingCookie(browserBinding, settings.loginCookieSameSite) },
   );
 };
 

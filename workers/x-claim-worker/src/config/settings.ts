@@ -1,7 +1,7 @@
 import type { Chain, Hex } from "viem";
 import { polygon } from "viem/chains";
 import { DECIMAL_PATTERN } from "../payout/amounts";
-import type { PayoutSettings, Settings } from "./types";
+import type { CookieSameSite, PayoutSettings, Settings } from "./types";
 
 export class SettingsError extends Error {}
 
@@ -19,6 +19,8 @@ const PAYOUT_CHAINS: Record<string, { chain: Chain; networkName: string }> = {
 };
 
 const PRIVATE_KEY_PATTERN = /^0x[0-9a-fA-F]{64}$/;
+
+const COOKIE_SAME_SITE_VALUES: readonly CookieSameSite[] = ["Lax", "None"];
 
 const optionalString = (env: Env, name: StringBinding): string | undefined =>
   env[name]?.trim() || undefined;
@@ -70,6 +72,13 @@ const requireExactUrl = (env: Env, name: StringBinding): string => {
   return raw;
 };
 
+const requireCookieSameSite = (env: Env, name: StringBinding): CookieSameSite => {
+  const raw = requireString(env, name);
+  const value = COOKIE_SAME_SITE_VALUES.find((sameSite) => sameSite === raw);
+  if (!value) throw new SettingsError(`${name} must be one of ${COOKIE_SAME_SITE_VALUES.join(", ")}`);
+  return value;
+};
+
 const requireBaseUrl = (env: Env, name: StringBinding): string =>
   requireExactUrl(env, name).replace(/\/+$/, "");
 
@@ -107,6 +116,7 @@ export const readSettings = (env: Env): Settings => {
 
   return {
     allowedOrigins: requireList(env, "ALLOWED_ORIGINS").map((origin) => origin.replace(/\/+$/, "")),
+    loginCookieSameSite: requireCookieSameSite(env, "LOGIN_COOKIE_SAME_SITE"),
     xRedirectUri: requireExactUrl(env, "X_REDIRECT_URI"),
     xClientId: requireString(env, "X_CLIENT_ID"),
     xClientSecret: requireString(env, "X_CLIENT_SECRET"),

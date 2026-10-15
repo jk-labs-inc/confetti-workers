@@ -6,7 +6,7 @@ import { issueWalletNonce } from "../../src/walletProof/siwe";
 import { X_API_ORIGIN, xUser, type XUserFixture } from "../fakes/xApi";
 import { TEST_APP_ORIGIN, TEST_WORKER_ORIGIN } from "../support/bindings";
 import { fillTodaysSpots, useClaimNetwork } from "../support/claimNetwork";
-import { callWorker, callWorkerWithEnv } from "../support/harness";
+import { callWorker, callWorkerWithEnv, proofPost } from "../support/harness";
 import { paraProof, randomAccount, randomAddress, siweProof } from "../support/proofs";
 import {
   authorizeUrlFrom,
@@ -73,6 +73,16 @@ describe("POST /x/start", () => {
       /^__Host-x_claim_browser=[A-Za-z0-9_-]{43}; Max-Age=600; Path=\/; Secure; HttpOnly; SameSite=Lax$/,
     );
     expect(response.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+  });
+
+  it("uses the configured SameSite for the browser cookie", async () => {
+    const response = await callWorkerWithEnv(
+      { LOGIN_COOKIE_SAME_SITE: "None" },
+      "/x/start",
+      proofPost(await paraProof(randomAddress()), { returnPath: "/" }),
+    );
+
+    expect(response.headers.get("Set-Cookie")).toMatch(/; Secure; HttpOnly; SameSite=None$/);
   });
 
   it("allows credentials in the preflight for /x/start only", async () => {

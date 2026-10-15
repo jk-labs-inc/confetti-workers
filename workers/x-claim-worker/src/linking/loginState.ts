@@ -1,3 +1,4 @@
+import type { CookieSameSite } from "../config/types";
 import { oneTimeStub } from "../oneTimeStore/oneTimeStore";
 import type { XLoginState } from "./types";
 
@@ -35,8 +36,8 @@ export const browserBindingFrom = (request: Request): string | null => {
   return null;
 };
 
-export const browserBindingCookie = (browserBinding: string): string =>
-  `${BROWSER_BINDING_COOKIE}=${browserBinding}; Max-Age=${X_LOGIN_STATE_TTL_SECONDS}; Path=/; Secure; HttpOnly; SameSite=Lax`;
+export const browserBindingCookie = (browserBinding: string, sameSite: CookieSameSite): string =>
+  `${BROWSER_BINDING_COOKIE}=${browserBinding}; Max-Age=${X_LOGIN_STATE_TTL_SECONDS}; Path=/; Secure; HttpOnly; SameSite=${sameSite}`;
 
 export const isSameBrowser = (loginState: XLoginState, request: Request): boolean => {
   const presented = browserBindingFrom(request);

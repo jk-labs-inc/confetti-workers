@@ -14,6 +14,7 @@ export const TEST_DAILY_LIMIT = 4;
 
 export const TEST_BINDINGS: Record<string, string> = {
   ALLOWED_ORIGINS: `${TEST_APP_ORIGIN},http://localhost:3000`,
+  LOGIN_COOKIE_SAME_SITE: "Lax",
   X_REDIRECT_URI: `${TEST_WORKER_ORIGIN}/x/callback`,
   PARA_ENVIRONMENT: "BETA",
   PARA_JWT_AUDIENCE: TEST_PARA_AUDIENCE,

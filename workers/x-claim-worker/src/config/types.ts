@@ -28,8 +28,11 @@ export interface PayoutSettings {
   alchemyApiKey: string;
 }
 
+export type CookieSameSite = "Lax" | "None";
+
 export interface Settings {
   allowedOrigins: string[];
+  loginCookieSameSite: CookieSameSite;
   xRedirectUri: string;
   xClientId: string;
   xClientSecret: string;
