@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { FakePostgrest } from "../fakes/postgrest";
-import { TEST_APP_ORIGIN, TEST_DAILY_LIMIT, TEST_SUPABASE_KEY, TEST_SUPABASE_URL } from "../support/bindings";
+import {
+  TEST_APP_ORIGIN,
+  TEST_DAILY_LIMIT,
+  TEST_SUPABASE_ANON_KEY,
+  TEST_SUPABASE_URL,
+  TEST_SUPABASE_WORKER_JWT,
+} from "../support/bindings";
 import { callWorker, useFakeNetwork } from "../support/harness";
 import { randomAddress } from "../support/proofs";
 
 let postgrest: FakePostgrest;
 useFakeNetwork((network) => {
-  postgrest = new FakePostgrest(TEST_SUPABASE_KEY);
+  postgrest = new FakePostgrest(TEST_SUPABASE_ANON_KEY, TEST_SUPABASE_WORKER_JWT);
   network.route(TEST_SUPABASE_URL, postgrest.handle);
 });
 

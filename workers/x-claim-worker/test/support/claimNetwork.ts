@@ -19,8 +19,9 @@ import {
   TEST_DAILY_LIMIT,
   TEST_PAYOUT_PRIVATE_KEY,
   TEST_RPC_URL,
-  TEST_SUPABASE_KEY,
+  TEST_SUPABASE_ANON_KEY,
   TEST_SUPABASE_URL,
+  TEST_SUPABASE_WORKER_JWT,
 } from "./bindings";
 import { envWith, useFakeNetwork, type EnvOverrides, type FakeNetwork } from "./harness";
 import { randomAddress } from "./proofs";
@@ -39,7 +40,7 @@ export interface ClaimNetwork {
 export const useClaimNetwork = (): ClaimNetwork => {
   const fakes = {} as ClaimNetwork;
   fakes.network = useFakeNetwork((network) => {
-    fakes.postgrest = new FakePostgrest(TEST_SUPABASE_KEY);
+    fakes.postgrest = new FakePostgrest(TEST_SUPABASE_ANON_KEY, TEST_SUPABASE_WORKER_JWT);
     fakes.x = new FakeX();
     fakes.chain = new FakeChain(polygon.id);
     fakes.alchemy = new FakeAlchemy(TEST_ALCHEMY_KEY);

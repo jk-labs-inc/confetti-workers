@@ -6,3 +6,4 @@ export const X_SCOPES = "users.read tweet.read";
 export const X_USER_FIELDS =
   "verified,verified_type,is_identity_verified,subscription_type,verified_followers_count,public_metrics,created_at";
 export const X_PLATFORM = "x";
+export const X_ERROR_BODY_LOG_LIMIT = 500;

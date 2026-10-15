@@ -1,7 +1,6 @@
 import type { SupabaseConfig, SupabaseMethod, SupabaseRequestOptions, SupabaseResponse } from "./types";
 
 const UNIQUE_VIOLATION_CODE = "23505";
-const LEGACY_JWT_KEY_PREFIX = "eyJ";
 const SUPABASE_REQUEST_TIMEOUT_MS = 10_000;
 
 export const RETURN_REPRESENTATION: SupabaseRequestOptions = { prefer: ["return=representation"] };
@@ -19,10 +18,10 @@ export class SupabaseError extends Error {
   }
 }
 
-const authHeaders = (config: SupabaseConfig): Record<string, string> =>
-  config.serviceRoleKey.startsWith(LEGACY_JWT_KEY_PREFIX)
-    ? { apikey: config.serviceRoleKey, Authorization: `Bearer ${config.serviceRoleKey}` }
-    : { apikey: config.serviceRoleKey };
+const authHeaders = (config: SupabaseConfig): Record<string, string> => ({
+  apikey: config.anonKey,
+  Authorization: `Bearer ${config.workerJwt}`,
+});
 
 const errorFrom = (status: number, text: string): SupabaseError => {
   let postgresCode: string | undefined;

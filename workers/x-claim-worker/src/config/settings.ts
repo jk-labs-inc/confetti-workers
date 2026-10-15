@@ -114,7 +114,8 @@ export const readSettings = (env: Env): Settings => {
     paraJwtAudience: requireString(env, "PARA_JWT_AUDIENCE"),
     supabase: {
       url: requireBaseUrl(env, "SUPABASE_URL"),
-      serviceRoleKey: requireString(env, "SUPABASE_SERVICE_ROLE_KEY"),
+      anonKey: requireString(env, "SUPABASE_ANON_KEY"),
+      workerJwt: requireString(env, "SUPABASE_WORKER_JWT"),
     },
     claimsPaused: requireBoolean(env, "CLAIMS_PAUSED"),
     release: {

@@ -1,6 +1,7 @@
 export interface SupabaseConfig {
   url: string;
-  serviceRoleKey: string;
+  anonKey: string;
+  workerJwt: string;
 }
 
 export type SupabaseMethod = "GET" | "HEAD" | "POST" | "PATCH";
@@ -36,7 +37,6 @@ export interface SocialLinkRow {
 
 export type SocialLinkProfile = Pick<
   SocialLinkRow,
-  | "platform_user_id"
   | "handle"
   | "verified"
   | "verified_type"

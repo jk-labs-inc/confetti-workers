@@ -4,8 +4,7 @@ import type { SocialLinkProfile, SocialLinkRow, SupabaseConfig } from "../supaba
 import type { XProfile } from "../x/types";
 import type { LinkResult } from "./types";
 
-const linkColumns = (profile: XProfile): SocialLinkProfile => ({
-  platform_user_id: profile.id,
+const profileColumns = (profile: XProfile): SocialLinkProfile => ({
   handle: profile.username,
   verified: profile.verified,
   verified_type: profile.verifiedType,
@@ -26,13 +25,13 @@ export const linkXAccount = async (
   address: string,
   profile: XProfile,
 ): Promise<LinkResult> => {
-  const columns = linkColumns(profile);
+  const columns = profileColumns(profile);
   const existing = await findLinkByPlatformUser(config, profile.id);
   if (existing)
     return linkResultFor(await refreshLinkProfile(config, existing.id, columns), address);
 
   try {
-    return { kind: "linked", link: await insertLink(config, address, columns) };
+    return { kind: "linked", link: await insertLink(config, address, profile.id, columns) };
   } catch (error) {
     if (!(error instanceof SupabaseError && error.isUniqueViolation)) throw error;
     const winner = await findLinkByPlatformUser(config, profile.id);

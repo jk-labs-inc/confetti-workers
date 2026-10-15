@@ -1,4 +1,4 @@
-import { X_USER_FIELDS, X_USERS_ME_URL } from "./constants";
+import { X_ERROR_BODY_LOG_LIMIT, X_USER_FIELDS, X_USERS_ME_URL } from "./constants";
 import { XApiError } from "./errors";
 import type { XProfile } from "./types";
 
@@ -40,6 +40,8 @@ export const fetchMe = async (accessToken: string): Promise<XProfile> => {
   url.searchParams.set("user.fields", X_USER_FIELDS);
   const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!response.ok)
-    throw new XApiError(`X users/me failed with ${response.status}`);
+    throw new XApiError(
+      `X users/me failed with ${response.status}: ${(await response.text()).slice(0, X_ERROR_BODY_LOG_LIMIT)}`,
+    );
   return parseXProfile(await response.json());
 };

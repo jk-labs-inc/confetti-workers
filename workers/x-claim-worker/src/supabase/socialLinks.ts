@@ -23,11 +23,12 @@ export const latestLinkForAddress = (
 export const insertLink = async (
   config: SupabaseConfig,
   address: string,
+  platformUserId: string,
   profile: SocialLinkProfile,
 ): Promise<SocialLinkRow> =>
   onlyRow(
     await supabaseRequest(config, "POST", TABLE, new URLSearchParams(), {
-      body: { address, platform: X_PLATFORM, ...profile },
+      body: { address, platform: X_PLATFORM, platform_user_id: platformUserId, ...profile },
       ...RETURN_REPRESENTATION,
     }),
   );

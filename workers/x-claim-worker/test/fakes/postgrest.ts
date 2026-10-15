@@ -9,9 +9,16 @@ interface UniqueIndex {
 interface TableDefinition {
   defaults: () => Row;
   uniqueIndexes: UniqueIndex[];
+  updatableColumns: Set<string>;
+  insertCheck: (row: Row) => boolean;
+  updateUsing: (row: Row) => boolean;
+  updateCheck: (row: Row) => boolean;
 }
 
 const ACTIVE_STATUSES = new Set(["pending", "paid"]);
+const INSERTABLE_CLAIM_STATUSES = new Set(["pending", "failed", "rejected"]);
+const SETTLED_CLAIM_STATUSES = new Set(["paid", "failed"]);
+const anyRow = () => true;
 
 const TABLES: Record<string, TableDefinition> = {
   social_links: {
@@ -36,6 +43,22 @@ const TABLES: Record<string, TableDefinition> = {
     uniqueIndexes: [
       { name: "social_links_platform_platform_user_id_key", columns: ["platform", "platform_user_id"] },
     ],
+    updatableColumns: new Set([
+      "handle",
+      "verified",
+      "verified_type",
+      "is_identity_verified",
+      "subscription_type",
+      "verified_followers_count",
+      "followers_count",
+      "following_count",
+      "post_count",
+      "account_created_at",
+      "updated_at",
+    ]),
+    insertCheck: anyRow,
+    updateUsing: anyRow,
+    updateCheck: anyRow,
   },
   claims_history: {
     defaults: () => ({
@@ -62,6 +85,10 @@ const TABLES: Record<string, TableDefinition> = {
         where: (row) => ACTIVE_STATUSES.has(String(row.status)),
       },
     ],
+    updatableColumns: new Set(["status", "tx_hash"]),
+    insertCheck: (row) => INSERTABLE_CLAIM_STATUSES.has(String(row.status)),
+    updateUsing: (row) => row.status === "pending",
+    updateCheck: (row) => SETTLED_CLAIM_STATUSES.has(String(row.status)),
   },
 };
 
@@ -110,7 +137,10 @@ export class FakePostgrest {
   readonly tables: Record<string, Row[]> = { social_links: [], claims_history: [] };
   private failures: InjectedFailure[] = [];
 
-  constructor(private readonly expectedKey: string) {}
+  constructor(
+    private readonly expectedAnonKey: string,
+    private readonly expectedWorkerJwt: string,
+  ) {}
 
   rows(table: string): Row[] {
     const rows = this.tables[table];
@@ -145,8 +175,10 @@ export class FakePostgrest {
   }
 
   handle = async (request: Request): Promise<Response> => {
-    if (request.headers.get("apikey") !== this.expectedKey)
+    if (request.headers.get("apikey") !== this.expectedAnonKey)
       return jsonResponse({ message: "Invalid API key" }, 401);
+    if (request.headers.get("Authorization") !== `Bearer ${this.expectedWorkerJwt}`)
+      return jsonResponse({ code: "PGRST301", message: "JWT is not the worker's" }, 401);
 
     const url = new URL(request.url);
     const table = url.pathname.replace(/^\/rest\/v1\//, "");
@@ -219,6 +251,17 @@ export class FakePostgrest {
     });
   }
 
+  private permissionDenied(table: string): Response {
+    return jsonResponse({ code: "42501", message: `permission denied for table ${table}` }, 403);
+  }
+
+  private policyViolation(table: string): Response {
+    return jsonResponse(
+      { code: "42501", message: `new row violates row-level security policy for table "${table}"` },
+      403,
+    );
+  }
+
   private uniqueViolation(index: UniqueIndex): Response {
     return jsonResponse(
       { code: "23505", message: `duplicate key value violates unique constraint "${index.name}"` },
@@ -228,6 +271,7 @@ export class FakePostgrest {
 
   private insert(table: string, definition: TableDefinition, input: Row, prefer: string): Response {
     const row = { ...definition.defaults(), ...input };
+    if (!definition.insertCheck(row)) return this.policyViolation(table);
     const violated = this.violatedIndex(table, definition, row);
     if (violated) return this.uniqueViolation(violated);
     this.rows(table).push(row);
@@ -236,7 +280,11 @@ export class FakePostgrest {
       : new Response(null, { status: 201 });
   }
 
-  private update(table: string, definition: TableDefinition, targets: Row[], patch: Row, prefer: string): Response {
+  private update(table: string, definition: TableDefinition, matches: Row[], patch: Row, prefer: string): Response {
+    if (Object.keys(patch).some((column) => !definition.updatableColumns.has(column)))
+      return this.permissionDenied(table);
+    const targets = matches.filter(definition.updateUsing);
+    if (targets.some((target) => !definition.updateCheck({ ...target, ...patch }))) return this.policyViolation(table);
     for (const target of targets) {
       const violated = this.violatedIndex(table, definition, { ...target, ...patch }, target);
       if (violated) return this.uniqueViolation(violated);
