@@ -138,7 +138,7 @@ export class FakePostgrest {
   private failures: InjectedFailure[] = [];
 
   constructor(
-    private readonly expectedAnonKey: string,
+    private readonly expectedPublishableKey: string,
     private readonly expectedWorkerJwt: string,
   ) {}
 
@@ -175,7 +175,7 @@ export class FakePostgrest {
   }
 
   handle = async (request: Request): Promise<Response> => {
-    if (request.headers.get("apikey") !== this.expectedAnonKey)
+    if (request.headers.get("apikey") !== this.expectedPublishableKey)
       return jsonResponse({ message: "Invalid API key" }, 401);
     if (request.headers.get("Authorization") !== `Bearer ${this.expectedWorkerJwt}`)
       return jsonResponse({ code: "PGRST301", message: "JWT is not the worker's" }, 401);

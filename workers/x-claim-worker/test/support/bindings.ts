@@ -2,7 +2,7 @@ export const TEST_APP_ORIGIN = "https://app.test";
 export const TEST_WORKER_ORIGIN = "https://worker.test";
 export const TEST_SUPABASE_URL = "https://supabase.test";
 export const TEST_RPC_URL = "https://rpc.test";
-export const TEST_SUPABASE_ANON_KEY = "test-anon-key";
+export const TEST_SUPABASE_PUBLISHABLE_KEY = "test-publishable-key";
 export const TEST_SUPABASE_WORKER_JWT = "test-worker-jwt";
 export const TEST_X_CLIENT_ID = "test-x-client";
 export const TEST_X_CLIENT_SECRET = "test-x-secret";
@@ -37,7 +37,7 @@ export const TEST_BINDINGS: Record<string, string> = {
   CLAIMS_PAUSED: "false",
   X_CLIENT_ID: TEST_X_CLIENT_ID,
   X_CLIENT_SECRET: TEST_X_CLIENT_SECRET,
-  SUPABASE_ANON_KEY: TEST_SUPABASE_ANON_KEY,
+  SUPABASE_PUBLISHABLE_KEY: TEST_SUPABASE_PUBLISHABLE_KEY,
   SUPABASE_WORKER_JWT: TEST_SUPABASE_WORKER_JWT,
   PAYOUT_PRIVATE_KEY: TEST_PAYOUT_PRIVATE_KEY,
   RPC_URL: TEST_RPC_URL,

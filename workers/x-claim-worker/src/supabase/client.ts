@@ -19,7 +19,7 @@ export class SupabaseError extends Error {
 }
 
 const authHeaders = (config: SupabaseConfig): Record<string, string> => ({
-  apikey: config.anonKey,
+  apikey: config.publishableKey,
   Authorization: `Bearer ${config.workerJwt}`,
 });
 

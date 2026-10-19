@@ -1,6 +1,6 @@
 export interface SupabaseConfig {
   url: string;
-  anonKey: string;
+  publishableKey: string;
   workerJwt: string;
 }
 
