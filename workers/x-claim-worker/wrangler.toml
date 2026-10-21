@@ -2,6 +2,7 @@ name = "x-claim-worker"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 account_id = "9ee018e54b2e51abe3f976f6df6b33e5"
+routes = [{ pattern = "claim.confetti.win", custom_domain = true }]
 
 [observability]
 enabled = true
@@ -28,10 +29,10 @@ storage = "sqlite"
 [vars]
 ALLOWED_ORIGINS = "https://confetti.win"
 LOGIN_COOKIE_SAME_SITE = "Lax"
-X_REDIRECT_URI = ""
-PARA_ENVIRONMENT = "BETA"
-PARA_JWT_AUDIENCE = ""
-SUPABASE_URL = ""
+X_REDIRECT_URI = "https://claim.confetti.win/x/callback"
+PARA_ENVIRONMENT = "PROD"
+PARA_JWT_AUDIENCE = "88f71a6f-2e37-42dd-bf11-c550e6f3f453"
+SUPABASE_URL = "https://iyatgghebmngotpnokhr.supabase.co"
 CLAIM_USD_AMOUNT = "5"
 DAILY_SPOT_LIMIT = "20"
 RELEASE_BATCH_SIZE = "5"
