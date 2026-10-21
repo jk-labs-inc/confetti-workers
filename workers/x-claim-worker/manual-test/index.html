@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X claim tester</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; }
+      input { width: 260px; font: inherit; padding: 4px 6px; }
+      button { font: inherit; padding: 6px 12px; margin: 0 6px 6px 0; cursor: pointer; }
+      .row { margin: 12px 0; }
+      #outcome { padding: 12px; border-radius: 6px; background: #eef6ee; display: none; }
+      pre { background: #f4f4f4; padding: 12px; border-radius: 6px; white-space: pre-wrap; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <h1>X claim tester</h1>
+
+    <div class="row">Worker: <input id="worker" /></div>
+    <div class="row">
+      Wallet: <code id="wallet">not connected</code>
+      <button id="connect">Connect wallet</button>
+    </div>
+
+    <div id="outcome"></div>
+
+    <div class="row">
+      <button id="spots">GET /spots</button>
+      <button id="start">Link X and claim</button>
+      <button id="me">GET /claim/me</button>
+      <button id="claim">POST /claim (retry)</button>
+    </div>
+
+    <h2>Log</h2>
+    <pre id="log"></pre>
+
+    <script type="module">
+      const element = (id) => document.getElementById(id);
+      const workerUrl = () => element("worker").value.replace(/\/+$/, "");
+      element("worker").value = location.port === "3000" ? "http://127.0.0.1:8787" : location.origin;
+      let address = null;
+
+      const log = (label, value) => {
+        const body = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+        element("log").textContent = `${new Date().toLocaleTimeString()}  ${label}\n${body}\n\n` + element("log").textContent;
+      };
+
+      const call = async (method, path, { proof, body, credentials } = {}) => {
+        const headers = {};
+        if (proof) headers["X-Wallet-Proof"] = proof;
+        if (body !== undefined) headers["Content-Type"] = "application/json";
+        const response = await fetch(workerUrl() + path, {
+          method,
+          headers,
+          body: body === undefined ? undefined : JSON.stringify(body),
+          credentials,
+        });
+        const text = await response.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          parsed = text;
+        }
+        log(`${method} ${path} → ${response.status}`, parsed);
+        return { status: response.status, body: parsed };
+      };
+
+      const utf8Hex = (text) =>
+        "0x" + [...new TextEncoder().encode(text)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+
+      const encodeProof = (proof) =>
+        btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(proof))))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+
+      const siweMessage = ({ nonce, chainId, expiresAt }) =>
+        [
+          `${location.host} wants you to sign in with your Ethereum account:`,
+          address,
+          "",
+          "Prove you own this wallet to claim on Confetti.",
+          "",
+          `URI: ${location.origin}`,
+          "Version: 1",
+          `Chain ID: ${chainId}`,
+          `Nonce: ${nonce}`,
+          `Issued At: ${new Date().toISOString()}`,
+          `Expiration Time: ${expiresAt}`,
+        ].join("\n");
+
+      const walletProof = async () => {
+        if (!address) throw new Error("Connect a wallet first");
+        const { status, body } = await call("POST", "/nonce");
+        if (status !== 200) throw new Error("Could not get a nonce from the worker");
+        const message = siweMessage(body);
+        const signature = await window.ethereum.request({ method: "personal_sign", params: [utf8Hex(message), address] });
+        return encodeProof({ kind: "siwe", message, signature });
+      };
+
+      const showAddress = (account) => {
+        address = account ? account.toLowerCase() : null;
+        element("wallet").textContent = address ?? "not connected";
+      };
+
+      const onClick = (id, handler) =>
+        element(id).addEventListener("click", async () => {
+          try {
+            await handler();
+          } catch (error) {
+            log("error", error?.message ?? String(error));
+          }
+        });
+
+      onClick("connect", async () => {
+        if (!window.ethereum) throw new Error("No browser wallet found. Install MetaMask or similar.");
+        const [account] = await window.ethereum.request({ method: "eth_requestAccounts" });
+        showAddress(account);
+      });
+
+      onClick("spots", () => call("GET", "/spots"));
+
+      onClick("start", async () => {
+        const proof = await walletProof();
+        const { status, body } = await call("POST", "/x/start", {
+          proof,
+          body: { returnPath: "/" },
+          credentials: "include",
+        });
+        if (status === 200) location.assign(body.authorizeUrl);
+      });
+
+      onClick("me", async () => call("GET", "/claim/me", { proof: await walletProof() }));
+
+      onClick("claim", async () => call("POST", "/claim", { proof: await walletProof() }));
+
+      const params = new URLSearchParams(location.search);
+      if (params.has("x_claim")) {
+        const outcome = Object.fromEntries(params);
+        element("outcome").style.display = "block";
+        element("outcome").textContent = `Back from X: ${JSON.stringify(outcome)}`;
+        log("redirect outcome", outcome);
+        history.replaceState(null, "", location.pathname);
+      }
+
+      window.ethereum
+        ?.request({ method: "eth_accounts" })
+        .then(([account]) => showAddress(account))
+        .catch(() => undefined);
+    </script>
+  </body>
+</html>
